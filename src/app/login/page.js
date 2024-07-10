@@ -1,40 +1,99 @@
-"use client"
+'use client'
+
 import React, { useState } from 'react';
+import { auth } from '../firbase';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from 'next/navigation';
+import GoogleButton from 'react-google-button'
 
-export default function Login() {
-  const [darkMode, setDarkMode] = useState(false);
+const googleProvider = new GoogleAuthProvider();
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const router = useRouter();
+
+  const handleEmailChange = (e) => setEmail(e.target.value);
+  const handlePasswordChange = (e) => setPassword(e.target.value);
+
+  const handleEmailSignIn = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert('Signed in successfully with email and password');
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      alert('Signed in successfully with Google');
+      router.push('/');
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-gray-900 text-white' : 'bg-blue-900 text-gray-900'}`}>
-      <div className={`w-96 p-8 rounded-lg shadow-md ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-        <h1 className="text-3xl font-semibold mb-4">Log In</h1>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Username</label>
-          <input type="text" className="w-full px-3 py-2 border rounded-md" />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Password</label>
-          <input type="password" className="w-full px-3 py-2 border rounded-md" />
-        </div>
-        <button className={`w-full py-2 text-white rounded-md ${darkMode ? 'bg-blue-500' : 'bg-blue-700'}`}>
-          Log In
-        </button>
-        <div className="mt-4 text-center">
-          <label className="cursor-pointer">
-            <input type="checkbox" className="mr-1" />
-            Remember me
-          </label>
-        </div>
-        <div className="mt-4 text-center">
-          <span className="cursor-pointer underline" onClick={toggleDarkMode}>
-            Toggle Dark Mode
-          </span>
-        </div>
-      </div>
+    <div style={styles.loginContainer}>
+      <h2 style={styles.loginHeading}>Login</h2>
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={handleEmailChange}
+        style={styles.input}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={handlePasswordChange}
+        style={styles.input}
+      />
+      <button onClick={handleEmailSignIn} style={styles.emailButton}>
+        Sign In with Email
+      </button>
+      <GoogleButton type="dark" onClick={handleGoogleSignIn} style={styles.googleButton} />
     </div>
   );
-}
+};
+
+const styles = {
+  
+  loginContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    gap: '5px',
+  },
+  loginHeading: {
+    fontSize: '32px', // Increased font size
+    marginBottom: '20px', // Adjusted margin to move the heading higher
+  },
+  input: {
+    padding: '10px',
+    margin: '5px 0',
+    width: '300px',
+    color: 'black',
+  },
+  emailButton: {
+    padding: '10px',
+    width: '220px',
+    marginTop: '10px',
+    border: '1px solid white',
+    color: 'white',
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+    transition: 'color 0.3s, background-color 0.3s',
+  },
+  googleButton: {
+    width: '220px',
+    marginTop: '30px',
+  },
+};
+
+export default Login;
